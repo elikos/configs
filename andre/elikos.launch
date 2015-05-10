@@ -1,0 +1,111 @@
+<launch>
+  <arg name="group_name" value="cameras_elikos" />
+  <arg name="debug" default="false" />
+  <arg name="debug_prefix" value="gdb -ex run --args" if="$(arg debug)"/>
+  <arg name="debug_prefix" value="" unless="$(arg debug)"/>
+  <!-- first camera and associated image pipeline -->
+    <node pkg="camera1394" type="camera1394_node" name="camera1394_node_front" output="screen">
+      <param name="guid" value="00b09d01008f706f" />
+      <param name="video_mode" value="640x480_mono8" />
+      <param name="frame_rate" value="60" />
+      <param name="frame_id" value="front" />
+      <param name="camera_info_url" type="string"
+             value="/home/andre/Documents/elikos/mcptam_catkin_ws/src/mcptam/calibrations/firefly.yaml" />
+			<param name="use_ros_time" value="true" />
+      <param name="external_trigger" value="true" />
+      <remap from="camera" to="camera_front" />
+    </node>
+    
+    <node pkg="image_view" type="image_view" name="image_view_left" >
+      <remap from="image" to="camera_front/image_raw" />
+    </node>
+
+  <!-- second camera and associated image pipeline -->
+    <node pkg="camera1394" type="camera1394_node" name="camera1394_node_right" >
+      <param name="guid" value="00b09d010099d8be" />
+      <param name="video_mode" value="640x480_mono8" />
+      <param name="frame_rate" value="60" />
+      <param name="frame_id" value="right" />
+      <param name="camera_info_url" value="/home/andre/Documents/elikos/mcptam_catkin_ws/src/mcptam/calibrations/firefly.yaml" />
+      <param name="use_ros_time" value="true" />
+      <param name="external_trigger" value="true" />
+      <remap from="camera" to="camera_right" />
+    </node>
+
+   <node pkg="image_view" type="image_view" name="image_view_right" >
+      <remap from="image" to="camera_right/image_raw" />
+    </node>
+
+<!--
+<node name="camera_calibrator" pkg="mcptam" type="camera_calibrator" output="screen">
+  <param name="cam_name" type="string" value="camera_right"/>
+  <param name="image_transport" type="string" value="compressed"/> 
+  <param name="image_topic" type="string" value="image_raw" />
+  <param name="info_topic" type="string" value="camera_info"/> 
+</node>
+-->
+
+
+<!--  
+  <node name="pose_calibrator" pkg="mcptam" type="pose_calibrator" clear_params="true" output="screen"> 
+    <rosparam command="load" file="$(find mcptam)/groups/$(arg group_name).yaml" />
+    <remap from="reset" to="pose_calibrator/reset" />
+    <param name="image_transport" type="string" value="compressed"/> 
+    <param name="pattern_width" type="int" value="8"/>
+    <param name="pattern_height" type="int" value="6"/>
+    <param name="square_size" type="double" value="0.024"/>
+    <param name="finder_max_ssd_per_pixel" type="int" value="500" />
+    <param name="kf_distance_mean_diff_fraction" type="double" value="0.0" />
+    <param name="kf_adaptive_thresh" type="bool" value="false" />
+  <param name="mm_large_point_test" type="bool" value="false" />
+    <param name="mm_only_first_cam" type="bool" value="true" />
+    <param name="level_zero_points" type="bool" value="true" />
+
+    <rosparam command="load" file="$(find mcptam)/masks/masks_1,2,3,4.yaml" />
+    <param name="masks_dir" type="string" value="$(find mcptam)/masks" />
+
+    <param name="pose_out_file" type="string" value="$(find mcptam)/poses/poses.dat" /> 
+  </node>
+-->
+
+<arg name="headless" default="false" />
+<arg name="separate_pose" default="false" />
+
+<!-- mcptam node -->
+<node name="mcptam" pkg="mcptam" type="mcptam" clear_params="true" output="screen" launch-prefix="$(arg debug_prefix)">
+  <rosparam command="load" file="$(find mcptam)/groups/$(arg group_name).yaml" />
+  
+  <remap from="reset" to="mcptam/reset" />
+  <param name="image_transport" type="string" value="compressed"/>
+  
+  <param name="get_pose_separately" type="bool" value="$(arg separate_pose)" />   
+  <!-- <param name="extrinsic_scale" type="double" value="0.95426" /> -->
+  
+  <param name="dynamic_sync" type="bool" value="true" />
+  
+  <!--
+  <param name="camera_pose_file" type="string" value="$(find mcptam)/poses/poses_calibrator.dat" />
+  -->
+<!--
+  <rosparam command="load" file="$(find mcptam)/masks/masks_1,2,3,4.yaml" />
+  <param name="masks_dir" type="string" value="$(find mcptam)/masks" />
+-->
+
+  <param name="mm_init_point_max_num" type="int" value="200" />
+
+  <param name="kf_distance_mean_diff_fraction" type="double" value="0.5" /> 
+  <param name="mm_max_scaled_mkf_dist" type="double" value="0.3" />
+  <param name="mm_outlier_multiplier" type="double" value="1.1" />
+  <param name="mm_init_cov_thresh" type="double" value="0.01" />
+  
+  <param name="level_zero_points" type="bool" value="true" />
+  
+  <!-- For no GUI, set headless:=true -->
+  <param name="headless" type="bool" value="$(arg headless)" />
+</node>
+
+<node pkg="tf" type="static_transform_publisher" name="world_tf" args="0 0 0 3.14159 0 0 world vision_world 100" />
+
+
+
+</launch>
