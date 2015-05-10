@@ -1,0 +1,5 @@
+0x00b09d010099d8be
+0x00b09d01008f706f
+60fps
+640x480 mono 8bpp
+external trigger
