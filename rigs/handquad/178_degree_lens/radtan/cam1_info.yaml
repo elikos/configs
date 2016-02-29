@@ -1,0 +1,21 @@
+# ROS yaml format
+image_width: 640
+image_height: 480
+camera_name: 00b09d01008f706f # or use the serial num 10082494 depending on the driver
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [357.8600236293827, 0, 344.302.2283270797704, 0, 358.7985644669848, 249.47420176850383, 0, 0, 1]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.2653591117715852, 0.05034609006248876, 0.0007345691028101465, 0.0012064868540726014, 0]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [357.8600236293827, 0, 344.302.2283270797704, 0, 0, 358.7985644669848, 249.47420176850383, 0, 0, 0, 1, 0]
