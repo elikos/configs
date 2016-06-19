@@ -1,0 +1,4 @@
+<launch>
+	<include file="$(find camera1394)/launch/pinky_right.launch"/>
+	<include file="$(find camera1394)/launch/pinky_left.launch"/>
+</launch>
